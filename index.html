@@ -145,6 +145,23 @@
   .status{font-size:13px;color:#8e6d7b;margin-top:6px}
   .summary{background:#fff7e7;border:2px solid #f3ddae;border-radius:18px;padding:12px;margin:10px 0}
   .reward{font-size:32px;letter-spacing:4px}
+  @media print{
+    body{background:#fff;margin:0;padding:0}
+    .petal{display:none}
+    .topbar{position:static;border:none;background:transparent;box-shadow:none;margin-bottom:20px;padding:0}
+    .actions{display:none}
+    .notice{display:none}
+    .legend{display:none}
+    .dayfooter{display:none}
+    .app{max-width:100%;margin:0;padding:0}
+    .table-wrap{border:none;padding:0;box-shadow:none;overflow:visible}
+    table{font-size:12px}
+    .slot{font-size:11px;padding:4px}
+    .slot .emoji{font-size:20px;margin-bottom:2px}
+    .tiny{font-size:10px}
+    h1{font-size:24px;margin-bottom:5px}
+    .subtitle{font-size:11px;margin-bottom:10px}
+  }
   @media(max-width:900px){
     .topbar{align-items:flex-start}
     .actions{max-width:260px}
@@ -172,6 +189,7 @@
       <button class="btn soft" id="templateBtn" style="display:none">💾 模板管理</button>
       <button class="btn soft" id="exportBtn">📥 匯出課表</button>
       <button class="btn soft" id="importBtn">📤 匯入課表</button>
+      <button class="btn soft" id="printBtn">🖨️ 列印 A4</button>
     </div>
     <input type="file" id="fileInput" accept=".json" style="display:none" />
   </div>
@@ -694,6 +712,9 @@ document.getElementById("fileInput").onchange=async e=>{
 
 document.getElementById("exportBtn").onclick=exportSchedule;
 document.getElementById("importBtn").onclick=importSchedule;
+document.getElementById("printBtn").onclick=()=>{
+  window.print();
+};
 
 render();
 </script>

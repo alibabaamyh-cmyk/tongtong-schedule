@@ -66,6 +66,7 @@
     padding:10px;box-shadow:var(--shadow);overflow:auto;
   }
   table{border-collapse:separate;border-spacing:8px;min-width:1120px;width:100%}
+  tbody tr{height:82px}
   th,td{vertical-align:middle}
   thead th{
     background:var(--pink2);padding:12px 8px;border-radius:16px;text-align:center;
@@ -166,6 +167,8 @@
     <div class="actions">
       <button class="btn soft" id="editBtn">🔐 安排課表</button>
       <button class="btn green" id="todayBtn">✨ 看今天</button>
+      <button class="btn soft" id="copyBtn" style="display:none">📋 複製行程</button>
+      <button class="btn soft" id="templateBtn" style="display:none">💾 模板管理</button>
       <button class="btn soft" id="exportBtn">📥 匯出課表</button>
       <button class="btn soft" id="importBtn">📤 匯入課表</button>
     </div>
@@ -226,6 +229,37 @@
   </div>
 </div></div>
 
+<!-- copy day -->
+<div class="modal" id="copyModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2>📋 複製行程</h2>
+  <p id="copyPrompt">選擇要複製的日期</p>
+  <div id="copyDayList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0"></div>
+  <div class="status">選好後，再選擇要複製到哪些日期</div>
+  <div id="copyTargetList" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0;display:none"></div>
+  <div style="display:flex;gap:10px;margin-top:14px">
+    <button class="btn primary" id="copyConfirmBtn">✅ 複製</button>
+    <button class="btn soft" data-close>取消</button>
+  </div>
+</div></div>
+
+<!-- template -->
+<div class="modal" id="templateModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2>💾 模板管理</h2>
+  <div style="margin-bottom:14px">
+    <p>保存現在的課表為模板：</p>
+    <div style="display:flex;gap:8px">
+      <input id="templateName" type="text" placeholder="輸入模板名稱，如：標準週課表" style="flex:1;border:2px solid #efd2df;border-radius:14px;padding:10px;font-size:16px" />
+      <button class="btn primary" id="saveTemplateBtn">保存</button>
+    </div>
+  </div>
+  <div style="border-top:2px solid #efd2df;padding-top:14px">
+    <p>已保存的模板：</p>
+    <div id="templateList"></div>
+  </div>
+</div></div>
+
 <!-- parent -->
 <div class="modal" id="parentModal"><div class="card">
   <button class="close" data-close>×</button>
@@ -265,9 +299,11 @@ state.schedule ||= {};
 state.logs ||= {};
 state.hearts ||= {};
 state.audio ||= {};
+let templates = JSON.parse(localStorage.getItem("tongtongTemplates") || "{}");
 let editMode = false;
 let selectedSlot = null;
 let timerInterval = null;
+let copySource = null;
 let activeTimer = null;
 let mediaRecorder = null;
 let audioChunks = [];
@@ -333,6 +369,92 @@ function show(id){document.getElementById(id).classList.add("show")}
 function hide(id){document.getElementById(id).classList.remove("show")}
 document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".modal").classList.remove("show"));
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+
+function openCopyModal(){
+  copySource=null;
+  const list=document.getElementById("copyDayList");
+  list.innerHTML="";
+  dates.forEach(d=>{
+    const b=document.createElement("button");
+    b.className="activity";
+    b.textContent=d.label;
+    b.onclick=()=>{
+      document.querySelectorAll("#copyDayList .activity").forEach(x=>x.style.opacity="0.5");
+      b.style.opacity="1";
+      copySource=d.date;
+      const targets=document.getElementById("copyTargetList");
+      targets.innerHTML="";
+      dates.filter(x=>x.date!==d.date).forEach(t=>{
+        const cb=document.createElement("label");
+        cb.style.display="flex";cb.style.alignItems="center";cb.style.gap="8px";cb.style.cursor="pointer";
+        const inp=document.createElement("input");inp.type="checkbox";inp.value=t.date;inp.dataset.target="true";
+        cb.appendChild(inp);cb.appendChild(document.createTextNode(t.label));
+        targets.appendChild(cb);
+      });
+      targets.style.display="grid";
+    };
+    list.appendChild(b);
+  });
+  show("copyModal");
+}
+document.getElementById("copyConfirmBtn").onclick=()=>{
+  if(!copySource){alert("請先選擇來源日期");return;}
+  const targets=Array.from(document.querySelectorAll("input[data-target]:checked")).map(x=>x.value);
+  if(!targets.length){alert("請選擇至少一個目標日期");return;}
+  targets.forEach(targetDate=>{
+    hours.filter(h=>h!==12&&h!==13).forEach(h=>{
+      const k=key(copySource,h);
+      const tk=key(targetDate,h);
+      if(state.schedule[k])state.schedule[tk]=state.schedule[k];
+    });
+  });
+  save();render();hide("copyModal");alert("✅ 複製完成！");
+};
+
+function saveTemplate(){
+  const name=document.getElementById("templateName").value.trim();
+  if(!name){alert("請輸入模板名稱");return;}
+  templates[name]={schedule:JSON.parse(JSON.stringify(state.schedule))};
+  localStorage.setItem("tongtongTemplates",JSON.stringify(templates));
+  document.getElementById("templateName").value="";
+  renderTemplateList();
+  alert("✅ 模板已保存："+name);
+}
+function renderTemplateList(){
+  const list=document.getElementById("templateList");
+  if(!Object.keys(templates).length){list.innerHTML="<div class='status'>還沒有保存模板</div>";return;}
+  list.innerHTML="";
+  Object.entries(templates).forEach(([name,tpl])=>{
+    const item=document.createElement("div");
+    item.className="parent-item";
+    item.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
+      <b>${name}</b>
+      <div style="display:flex;gap:8px">
+        <button class="btn soft" style="font-size:12px;padding:6px 10px" onclick="loadTemplate('${CSS.escape(name)}')">載入</button>
+        <button class="btn soft" style="font-size:12px;padding:6px 10px" onclick="deleteTemplate('${CSS.escape(name)}')">刪除</button>
+      </div>
+    </div>`;
+    list.appendChild(item);
+  });
+}
+function loadTemplate(name){
+  const tpl=templates[name];
+  if(!tpl){alert("模板不存在");return;}
+  const confirm_load=confirm(`確定要用「${name}」覆蓋現在的課表嗎？`);
+  if(!confirm_load)return;
+  state.schedule=JSON.parse(JSON.stringify(tpl.schedule));
+  save();render();hide("templateModal");alert("✅ 模板已載入！");
+}
+function deleteTemplate(name){
+  const confirm_del=confirm(`確定要刪除「${name}」嗎？`);
+  if(!confirm_del)return;
+  delete templates[name];
+  localStorage.setItem("tongtongTemplates",JSON.stringify(templates));
+  renderTemplateList();
+  alert("✅ 模板已刪除");
+}
+document.getElementById("saveTemplateBtn").onclick=saveTemplate;
+document.getElementById("templateBtn").onclick=()=>{renderTemplateList();show("templateModal");};
 
 document.getElementById("editBtn").onclick=()=>{
   if(editMode){

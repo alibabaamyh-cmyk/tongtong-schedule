@@ -1,0 +1,525 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<title>潼潼的一週小花課表</title>
+<style>
+  :root{
+    --pink:#f7b8cf;
+    --pink2:#ffe4ee;
+    --pink3:#fff3f8;
+    --rose:#d95f91;
+    --text:#5e4652;
+    --line:#efc9d7;
+    --cream:#fffaf7;
+    --green:#dff4df;
+    --yellow:#fff0b8;
+    --lav:#eee3ff;
+    --shadow:0 8px 24px rgba(191,93,132,.16);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 10% 10%, #fff 0 80px, transparent 81px),
+      linear-gradient(180deg,#fff8fb 0%,#fffdf8 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  button,input{font:inherit}
+  .petal{
+    position:fixed; width:28px; height:28px; border-radius:70% 30% 70% 30%;
+    background:#f8bfd4; opacity:.35; z-index:0; animation:spin 12s linear infinite;
+  }
+  .p1{left:3vw;top:10vh}.p2{right:5vw;top:20vh;animation-duration:16s}.p3{left:8vw;bottom:8vh;animation-duration:18s}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .app{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:18px 18px 36px}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    background:rgba(255,255,255,.88); border:2px solid var(--pink2);
+    border-radius:24px; padding:14px 18px; box-shadow:var(--shadow); backdrop-filter:blur(8px);
+    position:sticky; top:8px; z-index:20;
+  }
+  .title-wrap{display:flex;align-items:center;gap:12px}
+  .flower{font-size:36px;animation:spin 18s linear infinite}
+  h1{font-size:clamp(24px,3vw,40px);margin:0;color:#c34f7f}
+  .subtitle{font-size:14px;color:#8f7581;margin-top:3px}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+  .btn{
+    border:0;border-radius:16px;padding:12px 16px;min-height:48px;
+    font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.07);
+  }
+  .btn.primary{background:var(--rose);color:#fff}
+  .btn.soft{background:var(--pink2);color:#a6466c}
+  .btn.green{background:#caefcf;color:#39734a}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .notice{
+    margin:14px 0;background:#fff;border:2px dashed var(--pink);
+    border-radius:18px;padding:10px 14px;text-align:center;font-weight:700;color:#a65076
+  }
+
+  .table-wrap{
+    background:#fff;border:2px solid var(--pink2);border-radius:24px;
+    padding:10px;box-shadow:var(--shadow);overflow:auto;
+  }
+  table{border-collapse:separate;border-spacing:8px;min-width:1120px;width:100%}
+  th,td{vertical-align:middle}
+  thead th{
+    background:var(--pink2);padding:12px 8px;border-radius:16px;text-align:center;
+    color:#9f426a;font-size:15px;position:sticky;top:92px;z-index:6;
+  }
+  thead th:first-child{background:#fff1f6}
+  .timecell{
+    width:110px;text-align:center;font-weight:800;color:#8d6576;background:#fff6f9;
+    border-radius:15px;padding:10px 6px;position:sticky;left:0;z-index:5;
+  }
+  .slot{
+    min-width:135px;height:82px;border-radius:18px;border:2px solid #f0d8e2;
+    background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;
+    padding:8px;cursor:pointer;transition:.2s;position:relative;font-weight:700;
+  }
+  .slot:active{transform:scale(.98)}
+  .slot.empty{color:#be91a4;background:#fffafd}
+  .slot.fixed-lunch{background:var(--yellow);border-color:#f2d98a;color:#8b6a19;cursor:default}
+  .slot.flex{background:var(--green);border-color:#bfe3c4;color:#4a7d54;cursor:default}
+  .slot.current{
+    outline:5px solid rgba(217,95,145,.28);
+    transform:translateY(-2px) scale(1.03);
+    box-shadow:0 10px 24px rgba(217,95,145,.28);
+    animation:pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse{50%{box-shadow:0 12px 30px rgba(217,95,145,.42)}}
+  .slot .emoji{font-size:27px;display:block;margin-bottom:3px}
+  .tiny{font-size:12px;font-weight:600;opacity:.8}
+  .dayfooter{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin:12px 8px 4px 126px;min-width:994px
+  }
+  .parent-btn{background:#fff1f6;color:#a3456c;border:2px solid #efc6d7;border-radius:16px;padding:10px;font-weight:800}
+
+  .legend{
+    display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 6px;justify-content:center
+  }
+  .chip{
+    background:#fff;border:2px solid var(--pink2);border-radius:999px;padding:8px 12px;
+    font-size:13px;font-weight:700
+  }
+
+  .modal{
+    position:fixed;inset:0;background:rgba(94,70,82,.28);z-index:50;
+    display:none;align-items:center;justify-content:center;padding:18px;
+  }
+  .modal.show{display:flex}
+  .card{
+    width:min(720px,96vw);max-height:90vh;overflow:auto;background:#fff;border-radius:28px;
+    box-shadow:0 20px 60px rgba(79,36,55,.25);padding:20px;border:3px solid var(--pink2)
+  }
+  .card h2{margin:0 0 12px;color:#bd4d7b;font-size:28px}
+  .close{float:right;background:#f5e7ed;border:0;border-radius:50%;width:42px;height:42px;font-size:20px}
+  .activities{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .activity{
+    border:2px solid #efd7e1;background:#fff9fc;border-radius:18px;padding:14px 8px;
+    text-align:center;font-weight:800;cursor:pointer;min-height:105px
+  }
+  .activity .icon{font-size:34px;display:block}
+  .activity .zhuyin{font-size:12px;color:#9a7b88;margin-top:3px}
+  .activity.disabled{opacity:.35;pointer-events:none}
+  .password-row{display:flex;gap:10px;align-items:center}
+  .password-row input{
+    flex:1;border:2px solid #efd2df;border-radius:14px;padding:14px;font-size:20px
+  }
+  .timerbox{
+    background:#fff5f9;border:2px solid #efcada;border-radius:22px;padding:18px;text-align:center
+  }
+  .bigtime{font-size:48px;font-weight:900;color:#c54c7f;font-variant-numeric:tabular-nums}
+  .progress{height:14px;background:#f2e6eb;border-radius:99px;overflow:hidden;margin:14px 0}
+  .progress > div{height:100%;background:#ef8fb3;width:0}
+  .parent-list{display:grid;gap:12px}
+  .parent-item{border:2px solid #f0d8e2;border-radius:18px;padding:12px;background:#fffafd}
+  .heart{font-size:30px;background:transparent;border:0;cursor:pointer}
+  .recrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .status{font-size:13px;color:#8e6d7b;margin-top:6px}
+  .summary{background:#fff7e7;border:2px solid #f3ddae;border-radius:18px;padding:12px;margin:10px 0}
+  .reward{font-size:32px;letter-spacing:4px}
+  @media(max-width:900px){
+    .topbar{align-items:flex-start}
+    .actions{max-width:260px}
+    .btn{padding:10px 12px;min-height:44px}
+    .dayfooter{margin-left:126px}
+    .activities{grid-template-columns:repeat(2,1fr)}
+  }
+</style>
+</head>
+<body>
+<div class="petal p1"></div><div class="petal p2"></div><div class="petal p3"></div>
+<div class="app">
+  <div class="topbar">
+    <div class="title-wrap">
+      <div class="flower">🌸</div>
+      <div>
+        <h1>潼潼的一週小花課表</h1>
+        <div class="subtitle">第一週｜8/9（日）～ 8/15（六）｜每天 09:00–18:00</div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn soft" id="editBtn">🔐 安排課表</button>
+      <button class="btn green" id="todayBtn">✨ 看今天</button>
+    </div>
+  </div>
+
+  <div class="notice">🌷 一週安排一次就好喔！排好後，我們一起努力完成今天的小任務。</div>
+
+  <div class="table-wrap" id="tableWrap">
+    <table id="scheduleTable">
+      <thead><tr id="headRow"><th>時間</th></tr></thead>
+      <tbody id="body"></tbody>
+    </table>
+    <div class="dayfooter" id="dayFooter"></div>
+  </div>
+
+  <div class="legend">
+    <div class="chip">🍚 12:00–13:00 固定午餐</div>
+    <div class="chip">🌷 13:00–14:00 固定彈性時間</div>
+    <div class="chip">📺 看電視每天最多 60 分鐘</div>
+    <div class="chip">⏱️ 正式活動至少 25 分鐘才可結束</div>
+  </div>
+</div>
+
+<!-- password -->
+<div class="modal" id="passwordModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2>🔐 家長密碼</h2>
+  <p>請輸入密碼後再安排課表。</p>
+  <div class="password-row">
+    <input id="passwordInput" type="password" inputmode="numeric" placeholder="輸入密碼" />
+    <button class="btn primary" id="passwordOk">進入</button>
+  </div>
+  <div class="status" id="passwordStatus"></div>
+</div></div>
+
+<!-- activity chooser -->
+<div class="modal" id="activityModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2 id="activityTitle">🌸 選一個活動</h2>
+  <div class="activities" id="activityGrid"></div>
+  <div class="status">按「清空」可以把這個時段重新留白。</div>
+</div></div>
+
+<!-- timer -->
+<div class="modal" id="timerModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2 id="timerTitle">📚 看書時間</h2>
+  <div class="timerbox">
+    <div id="timerPrompt">準備好了嗎？</div>
+    <div class="bigtime" id="bigTime">00:00</div>
+    <div class="progress"><div id="progressFill"></div></div>
+    <div id="timerHint">按下開始後，至少 25 分鐘才可以完成。</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:14px">
+      <button class="btn primary" id="startBtn">▶ 開始</button>
+      <button class="btn green" id="finishBtn" disabled>🌟 我完成了！</button>
+    </div>
+  </div>
+</div></div>
+
+<!-- parent -->
+<div class="modal" id="parentModal"><div class="card">
+  <button class="close" data-close>×</button>
+  <h2 id="parentTitle">❤️ 家長檢視</h2>
+  <div class="summary" id="parentSummary"></div>
+  <div class="parent-list" id="parentList"></div>
+  <div class="status" style="margin-top:12px">🎙️ 錄音功能需允許瀏覽器使用麥克風。部分 iPad 瀏覽器在直接開啟本機 HTML 時可能無法錄音。</div>
+</div></div>
+
+<script>
+const PASSWORD = "1090604";
+const dates = [
+  {label:"日 8/9", date:"2026-08-09"},
+  {label:"一 8/10", date:"2026-08-10"},
+  {label:"二 8/11", date:"2026-08-11"},
+  {label:"三 8/12", date:"2026-08-12"},
+  {label:"四 8/13", date:"2026-08-13"},
+  {label:"五 8/14", date:"2026-08-14"},
+  {label:"六 8/15", date:"2026-08-15"}
+];
+const hours = [9,10,11,12,13,14,15,16,17];
+
+const activities = {
+  tv:{name:"看電視", icon:"📺", zhuyin:"ㄎㄢˋ ㄉㄧㄢˋ ㄕˋ", minutes:60, tv:true},
+  bopomo:{name:"ㄅㄆㄇ", icon:"🧸", zhuyin:"ㄅㄆㄇ", minutes:60},
+  abc:{name:"ABC", icon:"🔤", zhuyin:"ㄟ ㄅㄧ ㄒㄧ", minutes:60},
+  num:{name:"123", icon:"🔢", zhuyin:"ㄧ ㄦˋ ㄙㄢ", minutes:60},
+  draw:{name:"畫畫", icon:"🎨", zhuyin:"ㄏㄨㄚˋ ㄏㄨㄚˋ", minutes:60},
+  clay:{name:"黏土", icon:"🧁", zhuyin:"ㄋㄧㄢˊ ㄊㄨˇ", minutes:60},
+  read:{name:"看書", icon:"📚", zhuyin:"ㄎㄢˋ ㄕㄨ", minutes:60},
+  sport:{name:"運動", icon:"🤸", zhuyin:"ㄩㄣˋ ㄉㄨㄥˋ", minutes:60},
+  toy:{name:"玩玩具", icon:"🧩", zhuyin:"ㄨㄢˊ ㄨㄢˊ ㄐㄩˋ", minutes:60}
+};
+
+let state = JSON.parse(localStorage.getItem("tongtongScheduleV1") || "{}");
+state.schedule ||= {};
+state.logs ||= {};
+state.hearts ||= {};
+state.audio ||= {};
+let editMode = false;
+let selectedSlot = null;
+let timerInterval = null;
+let activeTimer = null;
+let mediaRecorder = null;
+let audioChunks = [];
+
+function save(){localStorage.setItem("tongtongScheduleV1",JSON.stringify(state));}
+
+function key(date,h){return `${date}_${h}`;}
+
+function render(){
+  const head = document.getElementById("headRow");
+  head.innerHTML = "<th>時間</th>" + dates.map(d=>`<th>${d.label}</th>`).join("");
+  const body = document.getElementById("body");
+  body.innerHTML = "";
+  for(const h of hours){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="timecell">${String(h).padStart(2,"0")}:00<br><span class="tiny">～ ${String(h+1).padStart(2,"0")}:00</span></td>`;
+    dates.forEach(d=>{
+      const td=document.createElement("td");
+      const div=document.createElement("div");
+      div.className="slot";
+      div.dataset.date=d.date; div.dataset.hour=h;
+      if(h===12){
+        div.classList.add("fixed-lunch");
+        div.innerHTML=`<div><span class="emoji">🍚</span>午餐時間<div class="tiny">固定</div></div>`;
+      }else if(h===13){
+        div.classList.add("flex");
+        div.innerHTML=`<div><span class="emoji">🌷</span>彈性時間<div class="tiny">吃飯・休息・自由玩</div></div>`;
+      }else{
+        const item=state.schedule[key(d.date,h)];
+        if(item && activities[item]){
+          const a=activities[item];
+          div.innerHTML=`<div><span class="emoji">${a.icon}</span>${a.name}<div class="tiny">${a.zhuyin}</div></div>`;
+        }else{
+          div.classList.add("empty");
+          div.innerHTML=`<div><span class="emoji">＋</span>選活動</div>`;
+        }
+        div.onclick=()=>slotClick(d.date,h);
+      }
+      td.appendChild(div); tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  }
+  const foot=document.getElementById("dayFooter");
+  foot.innerHTML=dates.map((d,i)=>`<button class="parent-btn" onclick="openParent('${d.date}','${d.label}')">❤️ 家長檢視</button>`).join("");
+  markCurrent();
+}
+
+function slotClick(date,h){
+  if(editMode){openActivity(date,h);return;}
+  const item=state.schedule[key(date,h)];
+  if(!item){return;}
+  const now=new Date();
+  const slotDate=new Date(`${date}T${String(h).padStart(2,"0")}:00:00`);
+  const slotEnd=new Date(`${date}T${String(h+1).padStart(2,"0")}:00:00`);
+  if(now>=slotDate && now<slotEnd){
+    openTimer(date,h,item);
+  }else{
+    alert("這個活動要到它的時間才可以開始喔 🌸");
+  }
+}
+
+function show(id){document.getElementById(id).classList.add("show")}
+function hide(id){document.getElementById(id).classList.remove("show")}
+document.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>b.closest(".modal").classList.remove("show"));
+document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m)m.classList.remove("show")}));
+
+document.getElementById("editBtn").onclick=()=>{
+  if(editMode){
+    editMode=false; document.getElementById("editBtn").textContent="🔐 安排課表"; render(); return;
+  }
+  document.getElementById("passwordInput").value="";
+  document.getElementById("passwordStatus").textContent="";
+  show("passwordModal");
+};
+document.getElementById("passwordOk").onclick=()=>{
+  const v=document.getElementById("passwordInput").value;
+  if(v===PASSWORD){
+    hide("passwordModal"); editMode=true;
+    document.getElementById("editBtn").textContent="✅ 完成安排";
+    render();
+  }else document.getElementById("passwordStatus").textContent="密碼不對喔，再試一次 🌷";
+};
+document.getElementById("passwordInput").addEventListener("keydown",e=>{if(e.key==="Enter")document.getElementById("passwordOk").click()});
+
+function tvCount(date){
+  let count=0;
+  hours.forEach(h=>{if(state.schedule[key(date,h)]==="tv")count+=60;});
+  return count;
+}
+
+function openActivity(date,h){
+  selectedSlot={date,h};
+  document.getElementById("activityTitle").textContent=`🌸 ${dates.find(d=>d.date===date).label} ${h}:00 選活動`;
+  const grid=document.getElementById("activityGrid");
+  grid.innerHTML="";
+  Object.entries(activities).forEach(([id,a])=>{
+    const b=document.createElement("button");
+    b.className="activity";
+    const wouldBeTv = id==="tv" && state.schedule[key(date,h)]!=="tv";
+    if(wouldBeTv && tvCount(date)>=60)b.classList.add("disabled");
+    b.innerHTML=`<span class="icon">${a.icon}</span>${a.name}<div class="zhuyin">${a.zhuyin}</div>`;
+    b.onclick=()=>{state.schedule[key(date,h)]=id;save();hide("activityModal");render();};
+    grid.appendChild(b);
+  });
+  const clear=document.createElement("button");
+  clear.className="activity";
+  clear.innerHTML=`<span class="icon">🧹</span>清空<div class="zhuyin">重新留白</div>`;
+  clear.onclick=()=>{delete state.schedule[key(date,h)];save();hide("activityModal");render();};
+  grid.appendChild(clear);
+  show("activityModal");
+}
+
+function markCurrent(){
+  document.querySelectorAll(".slot.current").forEach(x=>x.classList.remove("current"));
+  const now=new Date();
+  const yyyy=now.getFullYear(), mm=String(now.getMonth()+1).padStart(2,"0"), dd=String(now.getDate()).padStart(2,"0");
+  const ds=`${yyyy}-${mm}-${dd}`, h=now.getHours();
+  const el=document.querySelector(`.slot[data-date="${ds}"][data-hour="${h}"]`);
+  if(el)el.classList.add("current");
+}
+setInterval(markCurrent,30000);
+
+document.getElementById("todayBtn").onclick=()=>{
+  const now=new Date();
+  const ds=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const idx=dates.findIndex(d=>d.date===ds);
+  if(idx<0){alert("今天不在這一週裡喔 🌷");return;}
+  const first=document.querySelector(`.slot[data-date="${ds}"]`);
+  if(first) first.scrollIntoView({behavior:"smooth",block:"center",inline:"center"});
+};
+
+function openTimer(date,h,item){
+  const a=activities[item];
+  activeTimer={date,h,item,start:null};
+  document.getElementById("timerTitle").textContent=`${a.icon} ${a.name}時間`;
+  document.getElementById("bigTime").textContent="00:00";
+  document.getElementById("progressFill").style.width="0%";
+  document.getElementById("timerPrompt").textContent="準備好了嗎？";
+  document.getElementById("timerHint").textContent="按下開始後，至少 25 分鐘才可以完成。";
+  document.getElementById("startBtn").disabled=false;
+  document.getElementById("finishBtn").disabled=true;
+  show("timerModal");
+}
+
+document.getElementById("startBtn").onclick=()=>{
+  if(!activeTimer)return;
+  activeTimer.start=Date.now();
+  document.getElementById("startBtn").disabled=true;
+  document.getElementById("timerPrompt").textContent="加油！正在進行中 🌸";
+  timerInterval=setInterval(updateTimer,1000); updateTimer();
+};
+
+function updateTimer(){
+  if(!activeTimer?.start)return;
+  const sec=Math.floor((Date.now()-activeTimer.start)/1000);
+  const m=Math.floor(sec/60), s=sec%60;
+  document.getElementById("bigTime").textContent=`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  const pct=Math.min(100,sec/(25*60)*100);
+  document.getElementById("progressFill").style.width=pct+"%";
+  if(sec>=25*60){
+    document.getElementById("finishBtn").disabled=false;
+    document.getElementById("timerHint").textContent="已經超過 25 分鐘，可以完成囉！🌟";
+  }else{
+    const remain=25*60-sec;
+    document.getElementById("timerHint").textContent=`還要 ${Math.ceil(remain/60)} 分鐘才可以完成喔`;
+  }
+}
+
+document.getElementById("finishBtn").onclick=()=>{
+  if(!activeTimer?.start)return;
+  const end=Date.now();
+  const elapsed=Math.floor((end-activeTimer.start)/1000);
+  if(elapsed<25*60)return;
+  clearInterval(timerInterval);
+  const k=key(activeTimer.date,activeTimer.h);
+  state.logs[k]={
+    activity:activeTimer.item,
+    scheduled:`${activeTimer.h}:00–${activeTimer.h+1}:00`,
+    start:new Date(activeTimer.start).toISOString(),
+    end:new Date(end).toISOString(),
+    seconds:elapsed
+  };
+  save();
+  hide("timerModal");
+  alert("🌸 完成啦！今天的小花園又多一朵花！");
+  activeTimer=null;
+};
+
+function fmtLocal(iso){
+  const d=new Date(iso);
+  return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function openParent(date,label){
+  const pass=prompt("請輸入家長密碼：");
+  if(pass!==PASSWORD){if(pass!==null)alert("密碼不對喔");return;}
+  document.getElementById("parentTitle").textContent=`❤️ ${label} 家長檢視`;
+  const list=document.getElementById("parentList");
+  list.innerHTML="";
+  let completed=0;
+  hours.filter(h=>h!==12&&h!==13).forEach(h=>{
+    const k=key(date,h), log=state.logs[k], actId=state.schedule[k];
+    if(!actId)return;
+    const a=activities[actId];
+    if(log)completed++;
+    const item=document.createElement("div");
+    item.className="parent-item";
+    const mins=log?Math.round(log.seconds/60):0;
+    const heart=state.hearts[k]?"❤️":"♡";
+    item.innerHTML=`
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+        <div><b>${a.icon} ${a.name}</b> <span class="tiny">${h}:00–${h+1}:00</span></div>
+        <button class="heart" onclick="toggleHeart('${k}',this)">${heart}</button>
+      </div>
+      <div class="status">${log?`實際：${fmtLocal(log.start)}–${fmtLocal(log.end)}｜完成 ${mins} 分鐘`:"尚未完成"}</div>
+      <div class="recrow">
+        <button class="btn soft" onclick="startRecord('${k}',this)">🎙️ 錄音鼓勵</button>
+        <button class="btn green" onclick="playAudio('${k}')">▶ 播放鼓勵</button>
+      </div>
+      <div class="status" id="rec_${CSS.escape(k)}">${state.audio[k]?"已經有一段鼓勵錄音 💌":"還沒有錄音"}</div>`;
+    list.appendChild(item);
+  });
+  document.getElementById("parentSummary").innerHTML=`今天完成 <b>${completed}</b> 個活動。<div class="reward">${"🌸".repeat(Math.min(completed,7)) || "🌱"}</div>`;
+  if(!list.children.length)list.innerHTML='<div class="parent-item">今天還沒有安排活動。</div>';
+  show("parentModal");
+}
+function toggleHeart(k,btn){state.hearts[k]=!state.hearts[k];save();btn.textContent=state.hearts[k]?"❤️":"♡";}
+
+async function startRecord(k,btn){
+  if(!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder){alert("這個瀏覽器目前不支援錄音。");return;}
+  if(mediaRecorder && mediaRecorder.state==="recording"){alert("目前正在錄音喔");return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    audioChunks=[];
+    mediaRecorder=new MediaRecorder(stream);
+    mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+    mediaRecorder.onstop=()=>{
+      const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||"audio/webm"});
+      const reader=new FileReader();
+      reader.onloadend=()=>{
+        state.audio[k]=reader.result; save();
+        const el=document.getElementById("rec_"+CSS.escape(k)); if(el)el.textContent="錄音完成 💌";
+      };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.start(); btn.textContent="⏹️ 停止錄音";
+    btn.onclick=()=>{mediaRecorder.stop();btn.textContent="🎙️ 錄音鼓勵";btn.onclick=()=>startRecord(k,btn)};
+  }catch(e){alert("無法使用麥克風，請檢查瀏覽器權限。");}
+}
+function playAudio(k){
+  if(!state.audio[k]){alert("還沒有錄音喔");return;}
+  new Audio(state.audio[k]).play();
+}
+
+render();
+</script>
+</body>
+</html>

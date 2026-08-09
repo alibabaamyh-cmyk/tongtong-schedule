@@ -166,7 +166,10 @@
     <div class="actions">
       <button class="btn soft" id="editBtn">🔐 安排課表</button>
       <button class="btn green" id="todayBtn">✨ 看今天</button>
+      <button class="btn soft" id="exportBtn">📥 匯出課表</button>
+      <button class="btn soft" id="importBtn">📤 匯入課表</button>
     </div>
+    <input type="file" id="fileInput" accept=".json" style="display:none" />
   </div>
 
   <div class="notice">🌷 一週安排一次就好喔！排好後，我們一起努力完成今天的小任務。</div>
@@ -518,6 +521,50 @@ function playAudio(k){
   if(!state.audio[k]){alert("還沒有錄音喔");return;}
   new Audio(state.audio[k]).play();
 }
+
+function exportSchedule(){
+  const now=new Date();
+  const dateStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const filename=`tongtong_schedule_${dateStr}.json`;
+  const data=JSON.stringify(state,null,2);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  alert("✅ 課表已匯出！");
+}
+
+function importSchedule(){
+  document.getElementById("fileInput").click();
+}
+
+document.getElementById("fileInput").onchange=async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  try{
+    const text=await file.text();
+    const imported=JSON.parse(text);
+    if(!imported.schedule){alert("檔案格式不對喔");return;}
+    const confirm_import=confirm("確定要覆蓋目前的課表嗎？\n（原有的課表和錄音會被替換）");
+    if(!confirm_import)return;
+    state.schedule=imported.schedule||{};
+    state.logs=imported.logs||{};
+    state.hearts=imported.hearts||{};
+    state.audio=imported.audio||{};
+    save();
+    render();
+    alert("✅ 課表已匯入完成！");
+  }catch(err){
+    alert("匯入失敗："+err.message);
+  }
+  document.getElementById("fileInput").value="";
+};
+
+document.getElementById("exportBtn").onclick=exportSchedule;
+document.getElementById("importBtn").onclick=importSchedule;
 
 render();
 </script>

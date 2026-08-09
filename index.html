@@ -458,7 +458,10 @@ document.getElementById("templateBtn").onclick=()=>{renderTemplateList();show("t
 
 document.getElementById("editBtn").onclick=()=>{
   if(editMode){
-    editMode=false; document.getElementById("editBtn").textContent="🔐 安排課表"; render(); return;
+    editMode=false; document.getElementById("editBtn").textContent="🔐 安排課表";
+    document.getElementById("copyBtn").style.display="none";
+    document.getElementById("templateBtn").style.display="none";
+    render(); return;
   }
   document.getElementById("passwordInput").value="";
   document.getElementById("passwordStatus").textContent="";
@@ -469,6 +472,9 @@ document.getElementById("passwordOk").onclick=()=>{
   if(v===PASSWORD){
     hide("passwordModal"); editMode=true;
     document.getElementById("editBtn").textContent="✅ 完成安排";
+    document.getElementById("copyBtn").style.display="inline-block";
+    document.getElementById("templateBtn").style.display="inline-block";
+    document.getElementById("copyBtn").onclick=openCopyModal;
     render();
   }else document.getElementById("passwordStatus").textContent="密碼不對喔，再試一次 🌷";
 };
